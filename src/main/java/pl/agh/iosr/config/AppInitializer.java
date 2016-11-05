@@ -12,7 +12,6 @@ import javax.servlet.*;
  */
 public class AppInitializer implements WebApplicationInitializer {
 
-    @Override
     public void onStartup(ServletContext container) {
         // Create the 'root' Spring application context
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();

@@ -14,14 +14,14 @@ import java.io.*;
  */
 @RestController
 @RequestMapping("/")
-public class MainController {
+public class ManagerController {
 
     @Value("${files.main.directory}")
     private String filesDirectory;
 
     @PostConstruct
     public void init() {
-        //TODO: initialize zookeeper
+        //TODO: initialize zookeeper for this manager
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET)
@@ -37,20 +37,22 @@ public class MainController {
     @RequestMapping(value = "read/{fileName}", method = RequestMethod.GET)
     public @ResponseBody  String readFile(@PathVariable String fileName) {
         String filePath = getPathToFile(fileName);
-        String returnText = "";
-        try {
-            FileReader fr = new FileReader(filePath);
-            BufferedReader br = new BufferedReader(fr);
-            String temp = "";
-            while((temp = br.readLine()) != null) {
-                returnText += temp;
+
+            //TODO: ten kod do klienta, a tutaj podbicie ZK o tresc do klienta
+            String returnText = "";
+            try {
+                FileReader fr = new FileReader(filePath);
+                BufferedReader br = new BufferedReader(fr);
+                String temp = "";
+                while((temp = br.readLine()) != null) {
+                    returnText += temp;
+                }
+                fr.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            fr.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         System.out.println("READING FILE "+filePath+", read text = "+returnText);
         return returnText;
@@ -59,22 +61,25 @@ public class MainController {
     @RequestMapping(value = "write", method = RequestMethod.POST)
     public @ResponseBody String writeToFile(@RequestBody WriteContentDTO writeContent) {
         String pathToFile = getPathToFile(writeContent.getFileName());
-        File f = new File(pathToFile);
-        try {
-            FileWriter writer = new FileWriter(f);
-            writer.write(writeContent.getText());
-            writer.flush();
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "POST ERROR";
-        }
+
+            //TODO: ten kod do klienta, a tutaj setData rozpropagowane do wszystkich
+            File f = new File(pathToFile);
+            try {
+                FileWriter writer = new FileWriter(f);
+                writer.write(writeContent.getText());
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "POST ERROR";
+            }
 
         System.out.println("WRITING TO FILE "+pathToFile + ", text = "+writeContent.getText());
         return "POST OK";
     }
 
 
+    //TODO: idzie do klienta? kazdy bedzie mial swoja sciezke chyba
     private String getPathToFile(String fileName) {
         return filesDirectory + "\\" + fileName + ".txt";
     }
