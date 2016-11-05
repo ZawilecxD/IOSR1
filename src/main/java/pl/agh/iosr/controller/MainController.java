@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import pl.agh.iosr.utils.WriteContentDTO;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
@@ -34,7 +35,7 @@ public class MainController {
     }
 
     @RequestMapping(value = "read/{fileName}", method = RequestMethod.GET)
-    public @ResponseBody  String getUsersView(@PathVariable String fileName) {
+    public @ResponseBody  String readFile(@PathVariable String fileName) {
         String filePath = getPathToFile(fileName);
         String returnText = "";
         try {
@@ -56,8 +57,20 @@ public class MainController {
     }
 
     @RequestMapping(value = "write", method = RequestMethod.POST)
-    public String getUsersView(@RequestBody String fileName, @RequestBody String text) {
-        System.out.println("WRITING TO FILE "+getPathToFile(fileName) + ", text = "+text);
+    public @ResponseBody String writeToFile(@RequestBody WriteContentDTO writeContent) {
+        String pathToFile = getPathToFile(writeContent.getFileName());
+        File f = new File(pathToFile);
+        try {
+            FileWriter writer = new FileWriter(f);
+            writer.write(writeContent.getText());
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "POST ERROR";
+        }
+
+        System.out.println("WRITING TO FILE "+pathToFile + ", text = "+writeContent.getText());
         return "POST OK";
     }
 
