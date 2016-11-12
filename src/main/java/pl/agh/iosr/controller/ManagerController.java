@@ -59,14 +59,14 @@ public class ManagerController {
     }
 
     @RequestMapping(value = "write", method = RequestMethod.POST)
-    public @ResponseBody String writeToFile(@RequestBody WriteContentDTO writeContent) {
-        String pathToFile = getPathToFile(writeContent.getFileName());
+    public @ResponseBody String writeToFile(@RequestParam String fileName, @RequestParam String text) {
+        String pathToFile = getPathToFile(fileName);
 
             //TODO: ten kod do klienta, a tutaj setData rozpropagowane do wszystkich
             File f = new File(pathToFile);
             try {
                 FileWriter writer = new FileWriter(f);
-                writer.write(writeContent.getText());
+                writer.write(text);
                 writer.flush();
                 writer.close();
             } catch (IOException e) {
@@ -74,7 +74,7 @@ public class ManagerController {
                 return "POST ERROR";
             }
 
-        System.out.println("WRITING TO FILE "+pathToFile + ", text = "+writeContent.getText());
+        System.out.println("WRITING TO FILE "+pathToFile + ", text = "+text);
         return "POST OK";
     }
 
