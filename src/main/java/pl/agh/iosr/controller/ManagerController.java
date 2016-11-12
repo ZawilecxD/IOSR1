@@ -24,16 +24,6 @@ public class ManagerController {
         //TODO: initialize zookeeper for this manager
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
-    public String getIndexPage() {
-        return "index";
-    }
-
-    @RequestMapping(value = "main", method = RequestMethod.GET)
-    public String getUsersView() {
-        return "main";
-    }
-
     @RequestMapping(value = "read/{fileName}", method = RequestMethod.GET)
     public @ResponseBody  String readFile(@PathVariable String fileName) {
         String filePath = getPathToFile(fileName);

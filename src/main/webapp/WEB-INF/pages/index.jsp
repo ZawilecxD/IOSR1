@@ -9,54 +9,203 @@
 <html>
   <head>
     <title>Manager</title>
-    <script src="../jquery-3.1.1.min.js"></script>
+    <script src="resources/jquery-3.1.1.min.js" type="text/javascript"></script>
+    <style>
+      .logsParent {
+        width:49%;
+        display:inline-block;
+        vertical-align: top;
+      }
+
+      #getLogs thead, #postLogs thead {
+        text-align: center;
+      }
+
+      #postSettings, #getSettings {
+        border: 1px solid black;
+        width:49%;
+        min-height:220px;
+        vertical-align: top;
+        display: inline-block;
+        text-align:center;
+      }
+
+      table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+
+      tr:nth-child(even) {
+        background-color: #dddddd;
+      }
+
+    </style>
   </head>
   <body>
   <p>Podaj czas miedzy kolejnymi requestami w sekundach:</p>
-  <input type="number" id="timeoutValue"/>
-  <button id="setTimeout">Start</button>
-
-  <div id="getLogs">
-    <h2>GET LOGS</h2>
+  <div id="getSettings">
+    <h3>GET</h3>
+    <p>
+      <input type="number" id="GETIntervalValue" value="3"/>
+      <button id="setGETInterval">Set Interval</button>
+      <button id="stopGETInterval">Stop Interval</button>
+    </p>
+    <p>
+      <input type="text" id="getFileName" value="test1">
+      <button id="getFileNameChange">Change FileName</button>
+    </p>
+    <p>
+      <button id="getNOW">GET NOW with current parameters</button>
+    </p>
   </div>
-  <div id="postLogs">
-    <h2>POST LOGS</h2>
+  <div id="postSettings">
+    <h3>POST</h3>
+    <p>
+      <input type="number" id="POSTIntervalValue" value="3"/>
+      <button id="setPOSTInterval">Set Interval</button>
+      <button id="stopPOSTInterval">Stop Interval</button>
+    </p>
+    <p>
+      <input type="text" id="postFileName" value="test2">
+      <button id="postFileNameChange">Change FileName</button>
+    </p>
+    <p>
+      <input type="text" id="postText" value="post random text">
+      <button id="postTextChange">Change Text</button>
+    </p>
+    <p>
+      <button id="postNOW">POST NOW with current parameters</button>
+    </p>
+  </div>
+
+  <div>
+    <div class="logsParent">
+      <table id="getLogs">
+        <thead>GET LOGS</thead>
+        <tr>
+          <th>FileName</th>
+          <th>Read Text</th>
+          <th>Date</th>
+          <th>Request status</th>
+        </tr>
+      </table>
+    </div>
+    <div class="logsParent">
+      <table id="postLogs">
+        <thead>POST LOGS</thead>
+        <tr>
+          <th>FileName</th>
+          <th>Sent Text</th>
+          <th>Date</th>
+          <th>Request status</th>
+        </tr>
+      </table>
+    </div>
+
   </div>
 
 
   <script>
-    var timeoutHandle = null;
-    var counter = 0;
-    function appendGetLog(text) {
-      $("#getLogs").append("<p>"+text+"</p>")
+    var getIntervalHandle = null;
+    var postIntervalHandle = null;
+
+
+    var getCurrentFileName = 'test1';
+    var postCurrentFileName = 'test2';
+    var postCurrentText = 'random post text';
+
+    function appendGetLog(fileName, readText, status) {
+      $("#getLogs").append("<tr>" +
+                          "<td>"+fileName+"</td>" +
+                          "<td>"+readText+"</td>" +
+                          "<td>"+getDateString()+"</td>" +
+                          "<td>"+status+"</td>" +
+                          "</tr>")
     }
 
-    function appendPostLog() {
+    function appendPostLog(fileName, sentText, status) {
+      $("#postLogs").append("<tr>" +
+              "<td>"+fileName+"</td>" +
+              "<td>"+sentText+"</td>" +
+              "<td>"+getDateString()+"</td>" +
+              "<td>"+status+"</td>" +
+              "</tr>")
+    }
 
+    function getDateString() {
+      var date = new Date();
+      return date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
     }
 
     function sendGetRequest() {
-      $.get("demo_test.asp", function(data, status){
-        alert("Data: " + data + "\nStatus: " + status);
+      var currentFileName = getCurrentFileName;
+      $.ajax({
+        type: "GET",
+        url: window.location.href+"read/"+getCurrentFileName,
+        success: function(data, textStatus, jqXHR ) {
+          appendGetLog(currentFileName, data, textStatus);
+        }
       });
     }
 
     function sendPostRequest() {
-      $.post("demo_test_post.asp",
-              {
-                name: "Donald Duck",
-                city: "Duckburg"
-              },
-              function(data, status){
-                alert("Data: " + data + "\nStatus: " + status);
-              });
+      var currentFileName = postCurrentFileName;
+      var currentText = postCurrentText;
+      $.ajax({
+        type: "POST",
+        url: window.location.href+"write?fileName="+postCurrentFileName+"&text="+postCurrentText,
+        success: function(data, textStatus, jqXHR  ) {
+          appendPostLog(currentFileName, currentText, textStatus);
+        },
+      });
     }
 
     $(function() {
-      $("#setTimeout").on("click", function() {
-        clearTimeout(timeoutHandle);
-        timeoutHandle = setTimeout(sendGetRequest, $("#timeoutValue").val() * 1000);
+      $("#setGETInterval").on("click", function() {
+        clearInterval(getIntervalHandle);
+        getIntervalHandle = setInterval(sendGetRequest, $("#GETIntervalValue").val() * 1000);
       });
+
+      $("#setPOSTInterval").on("click", function() {
+        clearInterval(postIntervalHandle);
+        postIntervalHandle = setInterval(sendPostRequest, $("#POSTIntervalValue").val() * 1000);
+      });
+
+      $("#getNOW").on("click", function() {
+        sendGetRequest();
+      });
+
+      $("#postNOW").on("click", function() {
+        sendPostRequest();
+      })
+
+      $("#stopGETInterval").on("click" , function() {
+        clearInterval(getIntervalHandle);
+      });
+
+      $("#stopPOSTInterval").on("click" , function() {
+        clearInterval(postIntervalHandle);
+      });
+
+      $("#getFileNameChange").on("click" , function() {
+        getCurrentFileName = $("#getFileName").val();
+      });
+
+      $("#postFileNameChange").on("click" , function() {
+        postCurrentFileName = $("#postFileName").val();
+      });
+
+      $("#postTextChange").on("click" , function() {
+        postCurrentText = $("#postText").val();
+      });
+
     })
   </script>
   </body>
