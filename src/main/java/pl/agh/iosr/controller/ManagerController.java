@@ -12,6 +12,8 @@ import pl.agh.iosr.utils.WriteContentDTO;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Created by Murzynas on 2016-11-05.
@@ -47,10 +49,11 @@ public class ManagerController {
             e.printStackTrace();
             return;
         }
+
     }
 
     @RequestMapping(value = "read/{fileName}", method = RequestMethod.GET)
-    public @ResponseBody  String readFile(@PathVariable String fileName) {
+    public @ResponseBody  String readFile(@PathVariable String fileName) throws MalformedURLException {
         ServiceInstance<Void> instance;
         try {
             instance = serviceProvider.getInstance();
@@ -59,13 +62,14 @@ public class ManagerController {
             e.printStackTrace();
             return null;
         }
+        String returnText = "";
         String address = instance.buildUriSpec();
-        String response;    //TODO: delegate work here
+        URL url = new URL(address + "/get/" + fileName);
 
-        String filePath = getPathToFile(fileName);
 
-            //TODO: ten kod do klienta, a tutaj podbicie ZK o tresc do klienta
-            String returnText = "";
+/*        String filePath = getPathToFile(fileName);
+
+        //TODO: ten kod do klienta, a tutaj podbicie ZK o tresc do klienta
             try {
                 FileReader fr = new FileReader(filePath);
                 BufferedReader br = new BufferedReader(fr);
@@ -80,7 +84,7 @@ public class ManagerController {
                 e.printStackTrace();
             }
 
-        System.out.println("READING FILE "+filePath+", read text = "+returnText);
+        System.out.println("READING FILE "+filePath+", read text = "+returnText);*/
         return returnText;
     }
 
