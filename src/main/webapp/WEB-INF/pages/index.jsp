@@ -12,7 +12,7 @@
     <script src="resources/jquery-3.1.1.min.js" type="text/javascript"></script>
     <style>
       .logsParent {
-        width:49%;
+        width:32%;
         display:inline-block;
         vertical-align: top;
       }
@@ -21,9 +21,9 @@
         text-align: center;
       }
 
-      #postSettings, #getSettings {
+      #postSettings, #getSettings, #deleteSettings {
         border: 1px solid black;
-        width:49%;
+        width:32%;
         min-height:220px;
         vertical-align: top;
         display: inline-block;
@@ -84,6 +84,21 @@
       <button id="postNOW">POST NOW with current parameters</button>
     </p>
   </div>
+  <div id="deleteSettings">
+    <h3>DELETE</h3>
+    <p>
+      <input type="number" id="DELETEIntervalValue" value="3"/>
+      <button id="setDELETEInterval">Set Interval</button>
+      <button id="stopDELETEInterval">Stop Interval</button>
+    </p>
+    <p>
+      <input type="text" id="deleteFileName" value="test2">
+      <button id="deleteFileNameChange">Change FileName</button>
+    </p>
+    <p>
+      <button id="deleteNOW">DELETE NOW with current parameters</button>
+    </p>
+  </div>
 
   <div>
     <div class="logsParent">
@@ -108,6 +123,16 @@
         </tr>
       </table>
     </div>
+    <div class="logsParent">
+      <table id="deleteLogs">
+        <thead>DELETE LOGS</thead>
+        <tr>
+          <th>FileName</th>
+          <th>Date</th>
+          <th>Request status</th>
+        </tr>
+      </table>
+    </div>
 
   </div>
 
@@ -115,10 +140,12 @@
   <script>
     var getIntervalHandle = null;
     var postIntervalHandle = null;
+    var deleteIntervalHandle = null;
 
 
     var getCurrentFileName = 'test1';
     var postCurrentFileName = 'test2';
+    var deleteCurrentFileName = 'test2';
     var postCurrentText = 'random post text';
 
     function appendGetLog(fileName, readText, status) {
@@ -139,6 +166,14 @@
               "</tr>")
     }
 
+    function appendDeleteLog(fileName, status) {
+      $("#deleteLogs").append("<tr>" +
+              "<td>"+fileName+"</td>" +
+              "<td>"+getDateString()+"</td>" +
+              "<td>"+status+"</td>" +
+              "</tr>")
+    }
+
     function getDateString() {
       var date = new Date();
       return date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
@@ -151,6 +186,17 @@
         url: window.location.href+"read/"+getCurrentFileName,
         success: function(data, textStatus, jqXHR ) {
           appendGetLog(currentFileName, data, textStatus);
+        }
+      });
+    }
+
+    function sendDeleteRequest() {
+      var currentFileName = deleteCurrentFileName;
+      $.ajax({
+        type: "GET",
+        url: window.location.href+"delete/"+getCurrentFileName,
+        success: function(data, textStatus, jqXHR ) {
+          appendDeleteLog(currentFileName, textStatus);
         }
       });
     }
@@ -178,13 +224,22 @@
         postIntervalHandle = setInterval(sendPostRequest, $("#POSTIntervalValue").val() * 1000);
       });
 
+      $("#setDELETEInterval").on("click", function() {
+        clearInterval(deleteIntervalHandle);
+        deleteIntervalHandle = setInterval(sendDeleteRequest, $("#DELETEIntervalValue").val() * 1000);
+      });
+
       $("#getNOW").on("click", function() {
         sendGetRequest();
       });
 
       $("#postNOW").on("click", function() {
         sendPostRequest();
-      })
+      });
+
+      $("#deleteNOW").on("click", function() {
+        sendDeleteRequest();
+      });
 
       $("#stopGETInterval").on("click" , function() {
         clearInterval(getIntervalHandle);
@@ -194,12 +249,20 @@
         clearInterval(postIntervalHandle);
       });
 
+      $("#stopDELETEInterval").on("click" , function() {
+        clearInterval(deleteIntervalHandle);
+      });
+
       $("#getFileNameChange").on("click" , function() {
         getCurrentFileName = $("#getFileName").val();
       });
 
       $("#postFileNameChange").on("click" , function() {
         postCurrentFileName = $("#postFileName").val();
+      });
+
+      $("#deleteFileNameChange").on("click" , function() {
+        deleteCurrentFileName = $("#deleteFileName").val();
       });
 
       $("#postTextChange").on("click" , function() {

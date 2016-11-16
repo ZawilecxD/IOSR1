@@ -72,26 +72,24 @@ public class ManagerController {
         returnText = response.getBody();
         System.out.println("RESPONSE: "+returnText);
 
-
-/*        String filePath = getPathToFile(fileName);
-
-        //TODO: ten kod do klienta, a tutaj podbicie ZK o tresc do klienta
-            try {
-                FileReader fr = new FileReader(filePath);
-                BufferedReader br = new BufferedReader(fr);
-                String temp = "";
-                while((temp = br.readLine()) != null) {
-                    returnText += temp;
-                }
-                fr.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        System.out.println("READING FILE "+filePath+", read text = "+returnText);*/
         return returnText;
+    }
+
+    @RequestMapping(value = "delete/{fileName}", method = RequestMethod.GET)
+    public @ResponseBody  String deletefile(@PathVariable String fileName) throws MalformedURLException, UnirestException {
+        System.out.println("received delete request for "+fileName);
+//        ContentDTO contentDTO = new ContentDTO().withType(ContentDTO.OperationType.DELETE).withKey(fileName);
+//        byte[] data = contentDTO.toByteArray();
+//        System.out.println("ContentDTO bytearray:"+data);
+//
+//        try {
+//            curatorFramework.setData().forPath("/iosr1/worker", data);
+//            System.out.println("Data set for /iosr1/worker");
+//        } catch (Exception e) {
+//            System.out.println("Failure setting data");
+//            e.printStackTrace();
+//        }
+        return "Delete Ok";
     }
 
     @RequestMapping(value = "write", method = RequestMethod.POST)
@@ -115,21 +113,6 @@ public class ManagerController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-/*        String pathToFile = getPathToFile(fileName);
-
-            //TODO: ten kod do klienta, a tutaj setData rozpropagowane do wszystkich
-            File f = new File(pathToFile);
-            try {
-                FileWriter writer = new FileWriter(f);
-                writer.write(text);
-                writer.flush();
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return "POST ERROR";
-            }
-
-        System.out.println("WRITING TO FILE "+pathToFile + ", text = "+text);*/
         return "POST OK";
     }
 

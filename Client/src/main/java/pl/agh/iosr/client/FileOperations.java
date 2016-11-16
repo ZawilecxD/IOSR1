@@ -42,6 +42,12 @@ public class FileOperations {
         }
     }
 
+    public void deleteFile(String fileName) {
+        String pathToFile = getPathToFile(fileName);
+        File f = new File(pathToFile);
+        f.delete();
+    }
+
     private String getPathToFile(String fileName) {
         return ClientRunner.mainDirectoryPath + "\\" + fileName + ".txt";
     }

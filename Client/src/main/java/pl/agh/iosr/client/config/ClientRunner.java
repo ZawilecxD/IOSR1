@@ -9,6 +9,7 @@ import org.apache.curator.retry.RetryNTimes;
 import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.UriSpec;
+import pl.agh.iosr.client.FileOperations;
 import pl.agh.iosr.client.utils.ContentDTO;
 
 import static spark.Spark.get;
@@ -19,6 +20,7 @@ import static spark.Spark.port;
  */
 public class ClientRunner{
     public static String mainDirectoryPath;
+    private static FileOperations fileOperations = new FileOperations();
 
     public static void main(String[] args) throws Exception {
 
@@ -74,11 +76,10 @@ public class ClientRunner{
 
         port(port);
         get("/get/:key", (request, response) -> {
-            System.out.println("get request for value "+request.params(":key"));
-            return request.params(":key") + "->value";
+            return fileOperations.readTextFromFile(request.params(":key"));
         });
 
-
+        System.out.println("Client up and running!");
     }
 
 }
