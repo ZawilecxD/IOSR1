@@ -3,18 +3,21 @@ package pl.agh.iosr.client.config;
 import org.apache.commons.cli.*;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.recipes.cache.ChildData;
+import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.curator.retry.RetryNTimes;
 import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.UriSpec;
-import static spark.Spark.*;
-import java.io.InputStream;
+import pl.agh.iosr.client.utils.ContentDTO;
+
+import static spark.Spark.get;
+import static spark.Spark.port;
 
 /**
  * Created by Murzynas on 2016-11-05.
  */
-public class ClientRunner {
-    private InputStream inputStream;
+public class ClientRunner{
     public static String mainDirectoryPath;
 
     public static void main(String[] args) throws Exception {
@@ -42,9 +45,10 @@ public class ClientRunner {
 
         ServiceInstance serviceInstance = ServiceInstance.builder()
                 .uriSpec(new UriSpec("{scheme}://{address}:{port}"))
-                .address("0.0.0.0")
+                .address("127.0.0.1")
                 .port(port)
                 .name("worker")
+                .id("worker_"+port)
                 .build();
 
         ServiceDiscoveryBuilder.builder(Void.TYPE)
@@ -54,45 +58,27 @@ public class ClientRunner {
                 .build()
                 .start();
 
-//        System.out.println(args[0]);
-//        mainDirectoryPath = args[0];
+        NodeCache nodeCache = new NodeCache(curatorFramework, "/iosr1/worker");
+        nodeCache.getListenable().addListener(() -> {
+            System.out.println("NodeChanged");
+            ChildData currentData = nodeCache.getCurrentData();
+            byte[] bytes = curatorFramework.getData().forPath("/iosr1/worker");
+            System.out.println(bytes);
+            ContentDTO contentDTO = ContentDTO.fromByteArray(bytes);
+            System.out.println("deserialized");
+            System.out.println(contentDTO);
+            System.out.println(contentDTO.toString());
+            System.out.println("end of processing");
+        });
+        nodeCache.start();
 
-        //kręcimy się w kółko
-
-
+        port(port);
         get("/get/:key", (request, response) -> {
-            return request.params(":key")+"->value";
+            System.out.println("get request for value "+request.params(":key"));
+            return request.params(":key") + "->value";
         });
 
-        delete("/delete/:key", (request, response) -> {
-            return request.params(":key")+"removed";
-        });
 
     }
-
-    //TODO uzywamy properties czy arhumenty wywoalania progamu??
-//    private void readProperties() {
-//        try {
-//            Properties prop = new Properties();
-//            String propFileName = "config.properties";
-//
-//            inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
-//
-//            if (inputStream != null) {
-//                prop.load(inputStream);
-//            } else {
-//                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
-//            }
-//
-//
-//           String mainPath  =prop.getProperty("files.main.directory");
-//            System.out.println(mainPath);
-//
-//        } catch (Exception e) {
-//            System.out.println("Exception: " + e);
-//        } finally {
-//            inputStream.close();
-//        }
-//    }
 
 }
