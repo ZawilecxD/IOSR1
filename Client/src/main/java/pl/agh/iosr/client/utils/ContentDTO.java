@@ -1,13 +1,14 @@
 package pl.agh.iosr.client.utils;
 
 
+import org.apache.log4j.Priority;
+
 import java.io.*;
 
 /**
  * Created by Murzynas on 2016-11-05.
  */
 public class ContentDTO implements Serializable{
-
     public enum OperationType{
         ADD(1), DELETE(0);
 
@@ -49,45 +50,20 @@ public class ContentDTO implements Serializable{
         return this;
     }
 
-    public byte[] toByteArray(){
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out = null;
-        try {
-            out = new ObjectOutputStream(bos);
-            out.writeObject(this);
-            out.flush();
-            byte[] yourBytes = bos.toByteArray();
-            return yourBytes;
-        } catch (IOException ioe) {
-            return null;
-        } finally {
-            try {
-                bos.close();
-            } catch (IOException ex) {
-                // ignore close exception
-            }
-        }
+    public byte[] toByteArray() throws IOException{
+        return (type.toString() + ";" + key + ";" + value).getBytes();
     }
 
-    public static ContentDTO fromByteArray(byte[] bytes) {
-        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-        ObjectInput in = null;
-        try {
-            in = new ObjectInputStream(bis);
-            Object o = in.readObject();
-            return (ContentDTO) o;
-        }catch (IOException | ClassNotFoundException e){
-            return null;
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-            } catch (IOException ex) {
-                // ignore close exception
-            }
-        }
+    public static ContentDTO fromByteArray(byte[] bytes) throws IOException, ClassNotFoundException{
+        String str = new String(bytes);
+        String[] split = str.split(";");
+        String type = split[0];
+        String key = split[1];
+        String value = split[2];
+        return new ContentDTO().withType(type.equals("DELETE") ? OperationType.DELETE : OperationType.ADD).withKey(key).withValue(value);
+
     }
+
 
     public OperationType getType() {
         return type;

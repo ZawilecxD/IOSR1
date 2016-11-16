@@ -31,7 +31,7 @@ public class ContentDTO implements Serializable{
     * */
     private OperationType type;
     private String key;
-    private String value;
+    private String value = " ";
 
     public ContentDTO() {}
 
@@ -50,43 +50,18 @@ public class ContentDTO implements Serializable{
         return this;
     }
 
-    public byte[] toByteArray(){
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out = null;
-        try {
-            out = new ObjectOutputStream(bos);
-            out.writeObject(this);
-            out.flush();
-            return bos.toByteArray();
-        } catch (IOException ioe) {
-            return null;
-        } finally {
-            try {
-                bos.close();
-            } catch (IOException ex) {
-                // ignore close exception
-            }
-        }
+    public byte[] toByteArray() throws IOException{
+        return (type.toString() + ";" + key + ";" + value).getBytes();
     }
 
-    public static ContentDTO fromByteArray(byte[] bytes) {
-        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-        ObjectInput in = null;
-        try {
-            in = new ObjectInputStream(bis);
-            Object o = in.readObject();
-            return (ContentDTO) o;
-        }catch (IOException | ClassNotFoundException e){
-            return null;
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-            } catch (IOException ex) {
-                // ignore close exception
-            }
-        }
+    public static ContentDTO fromByteArray(byte[] bytes) throws IOException, ClassNotFoundException{
+        String str = new String(bytes);
+        String[] split = str.split(";");
+        String type = split[0];
+        String key = split[1];
+        String value = split[2];
+        return new ContentDTO().withType(type.equals("DELETE")? OperationType.DELETE : OperationType.ADD).withKey(key).withValue(value);
+
     }
 
     public OperationType getType() {

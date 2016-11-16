@@ -78,26 +78,20 @@ public class ManagerController {
     @RequestMapping(value = "delete/{fileName}", method = RequestMethod.GET)
     public @ResponseBody  String deletefile(@PathVariable String fileName) throws MalformedURLException, UnirestException {
         System.out.println("received delete request for "+fileName);
-//        ContentDTO contentDTO = new ContentDTO().withType(ContentDTO.OperationType.DELETE).withKey(fileName);
-//        byte[] data = contentDTO.toByteArray();
-//        System.out.println("ContentDTO bytearray:"+data);
-//
-//        try {
-//            curatorFramework.setData().forPath("/iosr1/worker", data);
-//            System.out.println("Data set for /iosr1/worker");
-//        } catch (Exception e) {
-//            System.out.println("Failure setting data");
-//            e.printStackTrace();
-//        }
+        ContentDTO contentDTO = new ContentDTO().withType(ContentDTO.OperationType.DELETE).withKey(fileName);
+        byte[] data = new byte[0];
+        try {
+            data = contentDTO.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("ContentDTO bytearray:"+data);
+
+        setDataForNode(data);
         return "Delete Ok";
     }
 
-    @RequestMapping(value = "write", method = RequestMethod.POST)
-    public @ResponseBody String writeToFile(@RequestParam String fileName, @RequestParam String text) {
-        ContentDTO contentDTO = new ContentDTO().withType(ContentDTO.OperationType.ADD).withKey(fileName).withValue(text);
-        byte[] data = contentDTO.toByteArray();
-        System.out.println("ContentDTO bytearray:"+data);
-
+    private void setDataForNode(byte[] data) {
         try {
             curatorFramework.setData().forPath("/iosr1/worker", data);
             System.out.println("Data set for /iosr1/worker");
@@ -105,11 +99,26 @@ public class ManagerController {
             System.out.println("Failure setting data");
             e.printStackTrace();
         }
+    }
 
+    @RequestMapping(value = "write", method = RequestMethod.POST)
+    public @ResponseBody String writeToFile(@RequestParam String fileName, @RequestParam String text) {
+        ContentDTO contentDTO = new ContentDTO().withType(ContentDTO.OperationType.ADD).withKey(fileName).withValue(text);
+        byte[] data = new byte[0];
+        try {
+            data = contentDTO.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("ContentDTO bytearray:"+data);
+
+        setDataForNode(data);
+
+        //TODO: remove
         try {
             byte[] bytes = curatorFramework.getData().forPath("/iosr1/worker");
             ContentDTO contentDTO1 = ContentDTO.fromByteArray(bytes);
-            System.out.println(contentDTO1);
+            System.out.println("Read contentDTO: "+contentDTO1);
         } catch (Exception e) {
             e.printStackTrace();
         }

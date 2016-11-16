@@ -12,6 +12,8 @@ import org.apache.curator.x.discovery.UriSpec;
 import pl.agh.iosr.client.FileOperations;
 import pl.agh.iosr.client.utils.ContentDTO;
 
+import java.io.IOException;
+
 import static spark.Spark.get;
 import static spark.Spark.port;
 
@@ -45,6 +47,8 @@ public class ClientRunner{
         }
         int port = Integer.parseInt(cmd.getOptionValue("port"));
 
+        mainDirectoryPath = "I:\\"+port;
+
         ServiceInstance serviceInstance = ServiceInstance.builder()
                 .uriSpec(new UriSpec("{scheme}://{address}:{port}"))
                 .address("127.0.0.1")
@@ -61,18 +65,8 @@ public class ClientRunner{
                 .start();
 
         NodeCache nodeCache = new NodeCache(curatorFramework, "/iosr1/worker");
-        nodeCache.getListenable().addListener(() -> {
-            System.out.println("NodeChanged");
-            ChildData currentData = nodeCache.getCurrentData();
-            byte[] bytes = curatorFramework.getData().forPath("/iosr1/worker");
-            System.out.println(bytes);
-            ContentDTO contentDTO = ContentDTO.fromByteArray(bytes);
-            System.out.println("deserialized");
-            System.out.println(contentDTO);
-            System.out.println(contentDTO.toString());
-            System.out.println("end of processing");
-        });
         nodeCache.start();
+        nodeCache.getListenable().addListener(() -> processNodeChange(nodeCache.getCurrentData()));
 
         port(port);
         get("/get/:key", (request, response) -> {
@@ -80,6 +74,27 @@ public class ClientRunner{
         });
 
         System.out.println("Client up and running!");
+    }
+
+    private static void processNodeChange(ChildData childData){
+        System.out.println("processing NodeChange");
+        byte[] data = childData.getData();
+        if(data != null && data.length!=0){
+            System.out.println("data not empty");
+            ContentDTO contentDTO = null;
+            try {
+                contentDTO = ContentDTO.fromByteArray(data);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            if(contentDTO!=null){
+                System.out.println(contentDTO);
+            }
+        } else {
+            System.out.println("NodeChange data empty");
+        }
     }
 
 }
