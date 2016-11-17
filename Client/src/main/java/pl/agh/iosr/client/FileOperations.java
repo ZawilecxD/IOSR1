@@ -19,8 +19,6 @@ public class FileOperations {
             returnText += temp;
         }
         fr.close();
-
-
         return returnText;
     }
 

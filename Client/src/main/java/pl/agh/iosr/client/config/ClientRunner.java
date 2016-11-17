@@ -12,6 +12,7 @@ import org.apache.curator.x.discovery.UriSpec;
 import pl.agh.iosr.client.FileOperations;
 import pl.agh.iosr.client.utils.ContentDTO;
 
+import java.io.File;
 import java.io.IOException;
 
 import static spark.Spark.get;
@@ -46,15 +47,17 @@ public class ClientRunner{
             return;
         }
         int port = Integer.parseInt(cmd.getOptionValue("port"));
+        String id = "worker_" + port;
 
-        mainDirectoryPath = "I:\\"+port;
+        boolean mkdir = new File(id).mkdir();
+        mainDirectoryPath = id;
 
         ServiceInstance serviceInstance = ServiceInstance.builder()
                 .uriSpec(new UriSpec("{scheme}://{address}:{port}"))
                 .address("127.0.0.1")
                 .port(port)
                 .name("worker")
-                .id("worker_"+port)
+                .id(id)
                 .build();
 
         ServiceDiscoveryBuilder.builder(Void.TYPE)
@@ -70,13 +73,15 @@ public class ClientRunner{
 
         port(port);
         get("/get/:key", (request, response) -> {
-            return fileOperations.readTextFromFile(request.params(":key"));
+            String fileName = request.params(":key");
+            System.out.println("Received GET request for "+fileName);
+            return fileOperations.readTextFromFile(fileName);
         });
 
         System.out.println("Client up and running!");
     }
 
-    private static void processNodeChange(ChildData childData){
+    private static void processNodeChange(ChildData childData) throws IOException {
         System.out.println("processing NodeChange");
         byte[] data = childData.getData();
         if(data != null && data.length!=0){
@@ -90,6 +95,15 @@ public class ClientRunner{
                 e.printStackTrace();
             }
             if(contentDTO!=null){
+                ContentDTO.OperationType type = contentDTO.getType();
+                switch (type) {
+                    case ADD:
+                        fileOperations.writeToFile(contentDTO.getKey(), contentDTO.getValue());
+                        break;
+                    case DELETE:
+                        fileOperations.deleteFile(contentDTO.getKey());
+                        break;
+                }
                 System.out.println(contentDTO);
             }
         } else {
