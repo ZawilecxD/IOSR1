@@ -9,17 +9,25 @@ import java.io.*;
  */
 public class FileOperations {
 
-    public String readTextFromFile(String fileName) throws IOException {
-        String pathToFile = getPathToFile(fileName);
-        String returnText = "";
-        FileReader fr = new FileReader(pathToFile);
-        BufferedReader br = new BufferedReader(fr);
-        String temp = "";
-        while((temp = br.readLine()) != null) {
-            returnText += temp;
+    public String readTextFromFile(String fileName) {
+
+        try {
+            String pathToFile = getPathToFile(fileName);
+            String returnText = "";
+            FileReader fr = null;
+            fr = new FileReader(pathToFile);
+            BufferedReader br = new BufferedReader(fr);
+            String temp = "";
+            while((temp = br.readLine()) != null) {
+                returnText += temp;
+            }
+            fr.close();
+            return returnText;
+        } catch (IOException e) {
+//            e.printStackTrace();ss
+            return "LOL NULL";
         }
-        fr.close();
-        return returnText;
+
     }
 
     public void writeToFile(String fileName, String text) throws IOException {
@@ -29,7 +37,6 @@ public class FileOperations {
         writer.write(text);
         writer.flush();
         writer.close();
-
     }
 
     public void deleteFile(String fileName) {
