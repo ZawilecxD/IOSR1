@@ -108,7 +108,7 @@
           <th>FileName</th>
           <th>Read Text</th>
           <th>Date</th>
-          <th>Request status</th>
+          <%--<th>Request status</th>--%>
         </tr>
       </table>
     </div>
@@ -119,7 +119,7 @@
           <th>FileName</th>
           <th>Sent Text</th>
           <th>Date</th>
-          <th>Request status</th>
+          <%--<th>Request status</th>--%>
         </tr>
       </table>
     </div>
@@ -129,7 +129,7 @@
         <tr>
           <th>FileName</th>
           <th>Date</th>
-          <th>Request status</th>
+          <%--<th>Request status</th>--%>
         </tr>
       </table>
     </div>
@@ -153,7 +153,7 @@
                           "<td>"+fileName+"</td>" +
                           "<td>"+readText+"</td>" +
                           "<td>"+getDateString()+"</td>" +
-                          "<td>"+status+"</td>" +
+//                          "<td>"+status+"</td>" +
                           "</tr>")
     }
 
@@ -162,7 +162,7 @@
               "<td>"+fileName+"</td>" +
               "<td>"+sentText+"</td>" +
               "<td>"+getDateString()+"</td>" +
-              "<td>"+status+"</td>" +
+//              "<td>"+status+"</td>" +
               "</tr>")
     }
 
@@ -170,7 +170,7 @@
       $("#deleteLogs").append("<tr>" +
               "<td>"+fileName+"</td>" +
               "<td>"+getDateString()+"</td>" +
-              "<td>"+status+"</td>" +
+//              "<td>"+status+"</td>" +
               "</tr>")
     }
 
@@ -194,7 +194,7 @@
       var currentFileName = deleteCurrentFileName;
       $.ajax({
         type: "GET",
-        url: window.location.href+"delete/"+getCurrentFileName,
+        url: window.location.href+"delete/"+currentFileName,
         success: function(data, textStatus, jqXHR ) {
           appendDeleteLog(currentFileName, textStatus);
         }

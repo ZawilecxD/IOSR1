@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.agh.iosr.utils.ContentDTO;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.MalformedURLException;
 
@@ -70,6 +71,9 @@ public class ManagerController {
         System.out.println(address);
         HttpResponse<String> response = Unirest.get(address).asString();
         returnText = response.getBody();
+        if(returnText.equals("LOL NULL")) {
+            returnText = "WSKAZANY PLIK NIE ISTNIEJE!!!";
+        }
         System.out.println("RESPONSE: "+returnText);
 
         return returnText;
